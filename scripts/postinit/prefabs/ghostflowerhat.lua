@@ -28,6 +28,10 @@ local function onequip(inst, owner)
 
     owner:AddTag("ghost_ally")
     inst:AddTag("elixir_drinker")
+
+    if owner:GetDebuff("elixir_buff") and owner:GetDebuff("elixir_buff").prefab == "ghostlyelixir_attack_buff" then
+        owner:AddDebuff("ghostvision_buff","ghostvision_buff")
+    end
 end
 
 local function onunequip(inst, owner)
@@ -60,6 +64,11 @@ local function onunequip(inst, owner)
 
     owner:RemoveTag("ghost_ally")
     inst:RemoveTag("elixir_drinker")
+
+    
+    if owner:GetDebuff("elixir_buff") and owner:GetDebuff("elixir_buff").prefab == "ghostlyelixir_attack_buff" then
+        owner:RemoveDebuff("ghostvision_buff")
+    end
 end
 
 

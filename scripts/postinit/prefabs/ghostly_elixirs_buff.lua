@@ -260,9 +260,18 @@ local buffs = {
     ghostlyelixir_attack_buff = {
         ONAPPLY_PLAYER = function(inst, target)
             target.components.combat.externaldamagemultipliers:SetModifier(inst, 1.1)
+
+			if not target:HasDebuff("ghostvision_buff") then
+				target.components.talker:Say(GetString(target, "ANNOUNCE_ELIXIR_GHOSTVISION"))
+			end
+			target:AddDebuff("ghostvision_buff","ghostvision_buff")
 		end,
 		ONDETACH_PLAYER = function(inst, target)
             target.components.combat.externaldamagemultipliers:RemoveModifier(inst)
+
+            if target:GetDebuff("ghostvision_buff") then
+                target:RemoveDebuff("ghostvision_buff")
+            end
 		end,
     },
 
@@ -398,42 +407,3 @@ end
 --     local phase = TheWorld.state.phase
 --     inst.components.combat.damagemultiplier = phase == "night" and 1.05 or phase == "dusk" and 0.95 or 0.85
 -- end
-
--- -- 夜影万金油人物上buff 功能重写
--- AddPrefabPostInit("ghostvision_buff", function(inst)
---     if not TheWorld.ismastersim then
---         return inst
---     end
-
---     local debuff = inst.components.debuff
---     if debuff ~= nil then
---         -- buff 添加
---         debuff.onattachedfn = function(inst, target)
---             inst.entity:SetParent(target.entity)
---             inst.Transform:SetPosition(0, 0, 0)
-
---             inst:ListenForEvent("death", function()
---                 inst.components.debuff:Stop()
---             end, target)
-
---             if target.prefab == "wendy" then
---                 target.components.combat.damagemultiplier = 1
---             else
---                 target.components.combat.damagemultiplier = target.components.combat.damagemultiplier + 0.1
---             end
---         end
-
---         -- buff 移除
---         debuff.ondetachedfn = function(inst, target)
---             if target ~= nil and target:IsValid() then
---                 if target.prefab == "wendy" then
---                     target.components.combat.damagemultiplier = 0.75
---                 else
---                     target.components.combat.damagemultiplier = target.components.combat.damagemultiplier - 0.1
---                 end
---             end
---         end
---     end
--- end)
-
-

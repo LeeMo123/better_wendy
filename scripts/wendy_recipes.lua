@@ -68,6 +68,14 @@ end
 
 -- 定义药剂配方数据表
 local elixir_recipes = {
+    {   -- 小回血药剂
+        name = "ghostlyelixir_slowregen",
+        ingredients = {Ingredient("spidergland", 1), Ingredient("ghostflower", 3)},
+    },
+    {   -- 大回血药剂
+        name = "ghostlyelixir_fastregen",
+        ingredients = {Ingredient("spidergland", 1), Ingredient("ghostflower", 6), Ingredient(CHARACTER_INGREDIENT.HEALTH,30)},
+    },
     {   -- 速度药剂
         name = "ghostlyelixir_speed",
         ingredients = {Ingredient("honey", 3), Ingredient("ghostflower", 3)},
@@ -98,16 +106,31 @@ local elixir_recipes = {
     }
 }
 
--- 循环注册配方并更新
 for _, recipe_data in ipairs(elixir_recipes) do
     local params = recipe_data.extra_params or {}
         
     -- 同步更新 AllRecipes 表（确保游戏内其他地方读取配方时也是最新数据）
     if AllRecipes[recipe_data.name] then
-        AllRecipes[recipe_data.name].ingredients = recipe_data.ingredients
-        -- 如果需要，也可以在这里更新 AllRecipes 的其他属性
+        local recipe = AllRecipes[recipe_data.name]
+        
+        -- 清空现有的材料表
+        recipe.ingredients = {}
+        recipe.character_ingredients = {}
+        recipe.tech_ingredients = {}
+        
+        -- 重新分类并添加所有材料
+        for k, v in pairs(recipe_data.ingredients) do
+            table.insert(
+                (GLOBAL.IsCharacterIngredient(v.type) and recipe.character_ingredients) or
+                (GLOBAL.IsTechIngredient(v.type) and recipe.tech_ingredients) or
+                recipe.ingredients,
+                v
+            )
+        end
+        
+        -- 更新其他属性
         for k, v in pairs(params) do
-            AllRecipes[recipe_data.name][k] = v
+            recipe[k] = v
         end
     end
 end
