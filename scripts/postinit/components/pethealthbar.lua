@@ -19,7 +19,7 @@ AddComponentPostInit("pethealthbar", function(self, inst)
 
     if not self.ismastersim then
         inst:ListenForEvent("pethealthsymbol1dirty", OnSymbolDirty1)
-        inst:ListenForEvent("pethealthsymbol1dirty", OnSymbolDirty3)
+        inst:ListenForEvent("pethealthsymbol3dirty", OnSymbolDirty3)
     end
 
     -- function self:GetSymbol()

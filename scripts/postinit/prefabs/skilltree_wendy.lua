@@ -429,8 +429,8 @@ local allegiance_skills = {
                                                                                               .GHOST_PLANARDEFENSE)
             end
 
-            inst:ListenForEvent("goinsane", goinsane)
-            inst:ListenForEvent("gosane", gosane)
+            -- inst:ListenForEvent("goinsane", goinsane)
+            -- inst:ListenForEvent("gosane", gosane)
         end,
 
         ondeactivate = function(inst, fromload)
@@ -458,8 +458,8 @@ local allegiance_skills = {
                 inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(0)
             end
 
-            inst:RemoveEventCallback("goinsane", goinsane)
-            inst:RemoveEventCallback("gosane", gosane)
+            -- inst:RemoveEventCallback("goinsane", goinsane)
+            -- inst:RemoveEventCallback("gosane", gosane)
         end
     },
 

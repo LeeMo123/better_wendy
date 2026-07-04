@@ -1,5 +1,48 @@
 local AllRecipes = GLOBAL.AllRecipes
 
+-- Wendy
+local function elixir_numtogive(recipe, doer)
+	local total = 1
+	if doer.components.skilltreeupdater and doer.components.skilltreeupdater:IsActivated("wendy_potion_yield") then
+		if TryLuckRoll(doer, TUNING.GHOSTLYELIXIR_EXTRA1_CHANCE, LuckFormulas.LootDropperChance) then
+			total = total + 1
+		end
+
+		if TryLuckRoll(doer, TUNING.GHOSTLYELIXIR_EXTRA2_CHANCE, LuckFormulas.LootDropperChance) then
+			total = total + 1
+		end
+
+		if total > 1 then
+			doer:PushEvent("craftedextraelixir",total)
+		end
+	end
+	return total
+end
+
+local function ChangeSortKey(recipe_name, recipe_reference, filter, after)
+    local recipes = CRAFTING_FILTERS[filter].recipes
+    local recipe_name_index
+    local recipe_reference_index
+
+    for i = #recipes, 1, -1 do
+        if recipes[i] == recipe_name then
+            recipe_name_index = i
+        elseif recipes[i] == recipe_reference then
+            recipe_reference_index = i + (after and 1 or 0)
+        end
+        if recipe_name_index and recipe_reference_index then
+            if recipe_name_index >= recipe_reference_index then
+                table.remove(recipes, recipe_name_index)
+                table.insert(recipes, recipe_reference_index, recipe_name)
+            else
+                table.insert(recipes, recipe_reference_index, recipe_name)
+                table.remove(recipes, recipe_name_index)
+            end
+            break
+        end
+    end
+end
+
 -- 墓碑
 AddRecipe2("wendy_gravestone",
     { 
@@ -48,6 +91,24 @@ AddRecipe2("wendy_petals_evil",
     },
     {"CHARACTER"}
 )
+
+-- 恶魔花
+AddRecipe2("ghostlyelixir_light",
+    {
+        Ingredient("wormlight", 1), 
+        Ingredient("ghostflower", 3)
+    },									
+    TECH.NONE,				
+    {
+        builder_tag="elixirbrewer", 
+        numtogive = 1,
+        override_numtogive_fn = elixir_numtogive, 
+        no_deconstruction=true,
+        atlas = "images/inventoryimages/ghostlyelixir_light.xml",
+    },
+    {"CHARACTER"}
+)
+ChangeSortKey("ghostlyelixir_light", "ghostlyelixir_speed", "CHARACTER", true)
 
 -- Wendy
 local function elixir_numtogive(recipe, doer)

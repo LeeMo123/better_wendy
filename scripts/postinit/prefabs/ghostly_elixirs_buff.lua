@@ -70,77 +70,33 @@ local onattacked_shield = function(inst, data)
         return
     end
 
-   if inst.shield_cd == nil then
-       local fx = SpawnPrefab("elixir_player_forcefield")
-       inst:AddChild(fx)
-       inst.SoundEmitter:PlaySound("dontstarve/characters/wendy/abigail/shield/on")
+    local debuff = GetDeBuff(inst)
+    --  复仇药剂反伤效果    
+    if debuff.potion_tunings.playerreatliate then
+        if data.attacker ~= nil then
+            data.attacker.components.combat:GetAttacked(inst, TUNING.GHOSTLYELIXIR_RETALIATION_DAMAGE)
+            SpawnPrefab("abigail_retaliation"):SetRetaliationTarget(data.attacker)
+        end
+    end
+
+    if inst.shield_cd == nil then
+        local fx = SpawnPrefab("elixir_player_forcefield")
+        inst:AddChild(fx)
+        inst.SoundEmitter:PlaySound("dontstarve/characters/wendy/abigail/shield/on")
 
         inst.components.health.externalreductionmodifiers:RemoveModifier(inst, "forcefield")
 
-        --  不屈药剂和复仇药剂 减伤效果    
-        local debuff = GetDeBuff(inst)
-       if debuff.potion_tunings.playerreatliate then
-           local hitrange = 5
-           local damage = TUNING.GHOSTLYELIXIR_RETALIATION_DAMAGE
-           debuff.ignore = {}
-
-           local x, y, z = inst.Transform:GetWorldPosition()
-
-           for i, v in ipairs(TheSim:FindEntities(x, y, z, hitrange, COMBAT_TARGET_TAGS, NO_TAGS_NO_PLAYERS)) do
-               if not debuff.ignore[v] and
-                   v:IsValid() and
-                   v.entity:IsVisible() and
-                   v.components.combat ~= nil then
-                   local range = hitrange + v:GetPhysicsRadius(0)
-                   if v:GetDistanceSqToPoint(x, y, z) < range * range then
-                       if inst.owner ~= nil and not inst.owner:IsValid() then
-                           inst.owner = nil
-                       end
-                       if inst.owner ~= nil then
-                           if inst.owner.components.combat ~= nil and
-                               inst.owner.components.combat:CanTarget(v) and
-                               not inst.owner.components.combat:IsAlly(v)
-                           then
-                               debuff.ignore[v] = true
-                               local retaliation = SpawnPrefab("abigail_retaliation")
-                               retaliation:SetRetaliationTarget(v)
-                               --V2C: wisecracks make more sense for being pricked by picking
-                               --v:PushEvent("thorns")
-                           end
-                       elseif v.components.combat:CanBeAttacked() then
-                           -- NOTES(JBK): inst.owner is nil here so this is for non worn things like the bramble trap.
-                           local isally = false
-                           if not inst.canhitplayers then
-                               --non-pvp, so don't hit any player followers (unless they are targeting a player!)
-                               local leader = v.components.follower ~= nil and v.components.follower:GetLeader() or nil
-                               isally = leader ~= nil and leader:HasTag("player") and
-                                   not (v.components.combat ~= nil and
-                                       v.components.combat.target ~= nil and
-                                       v.components.combat.target:HasTag("player"))
-                           end
-                           if not isally then
-                               debuff.ignore[v] = true
-                               v.components.combat:GetAttacked(inst, damage, nil, nil, inst.spdmg)
-                               local retaliation = SpawnPrefab("abigail_retaliation")
-                               retaliation:SetRetaliationTarget(v)
-                               --v:PushEvent("thorns")
-                           end
-                       end
-                   end
-               end
-           end
-       end
-
-       inst.shield_cd = inst:DoTaskInTime(10 + math.random(2, 4), function()            
+        inst.shield_cd = inst:DoTaskInTime(10, function()
             if inst.components.health ~= nil then
-                inst.components.health.externalreductionmodifiers:SetModifier(inst, inst:HasTag("player") and TUNING.GHOSTLYELIXIR_PLAYER_SHIELD_REDUCTION or
-                    debuff.potion_tunings.playerreatliate and 150 or 100, "forcefield")
+                inst.components.health.externalreductionmodifiers:SetModifier(inst,
+                    inst:HasTag("player") and TUNING.GHOSTLYELIXIR_PLAYER_SHIELD_REDUCTION or
+                        debuff.potion_tunings.playerreatliate and 150 or 100, "forcefield")
             end
 
             inst.shield_cd:Cancel()
             inst.shield_cd = nil
-       end)
-   end
+        end)
+    end
 end
 
 

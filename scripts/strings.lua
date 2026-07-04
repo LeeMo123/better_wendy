@@ -29,7 +29,9 @@ if lang_id == 22 or lang_id == 21 then
     STRINGS.SKILLTREE.WENDY.WENDY_LUNAR_3_DESC = "温蒂可以制作一种注入了月能的超级药剂，将转阿比盖尔转变成虚影状态，攻击方式同虚影一致。"
     STRINGS.SKILLTREE.WENDY.WENDY_SHADOW_2_DESC_NEW = "阿比盖尔与暗影调和，获得更多的位面防御。"
     STRINGS.SKILLTREE.WENDY.WENDY_SHADOW_3_DESC = "温蒂学会了制作暗影魔法药剂，阿比盖尔能够转变成黑暗魔法形态，协同温蒂可以对生物造成更多的位面伤害。"
-    
+
+    -- 发光浆果药剂
+    STRINGS.NAMES.GHOSTLYELIXIR_LIGHT = "发光浆果药剂"
 else
     -- 惊吓 
     STRINGS.SKILLTREE.WENDY.WENDY_GHOSTCOMMAND_3_DESC = "Abigail can use her powers as a spooky ghost to scare."
@@ -55,10 +57,17 @@ else
     STRINGS.SKILLTREE.WENDY.WENDY_LUNAR_3_DESC = "Wendy can craft a super potion infused with lunar energy, transforming Abigail into an ethereal form with attacks identical to those of a phantom."
     STRINGS.SKILLTREE.WENDY.WENDY_SHADOW_2_DESC_NEW = "Abigail attunes with the shadows and earns more Planar Defense."
     STRINGS.SKILLTREE.WENDY.WENDY_SHADOW_3_DESC = "Wendy learns to craft shadow magic potions, enabling Abigail to transform into a dark magic form. When working in tandem with Wendy, they can deal additional planar damage to creatures."
+
+    -- ghostlyelixir light
+    STRINGS.NAMES.GHOSTLYELIXIR_LIGHT = STRINGS.NAMES.WORMLIGHT .." "..STRINGS.SCRAPBOOK.SUBCATS.ELIXER
 end
 
 -- 月数花 制作
 STRINGS.RECIPE_DESC.WENDY_MOON_TREE_BLOSSOM = STRINGS.CHARACTERS.WOODIE.DESCRIBE.MOON_TREE_BLOSSOM
+-- 发光浆果 制作
+STRINGS.RECIPE_DESC.GHOSTLYELIXIR_LIGHT =STRINGS.RECIPE_DESC.CARNIVALCANNON_SPARKLE_KIT
+-- 发光浆果 角色检查词
+STRINGS.CHARACTERS.GENERIC.DESCRIBE.GHOSTLYELIXIR_LIGHT = STRINGS.CHARACTERS.WEBBER.DESCRIBE.WORMLIGHT
 
 -- 小惊吓任务
 -- 1

@@ -10,9 +10,9 @@ local function GetBufftype(inst, target)
         has_skill = true
     end
 
-    print("has_skill", has_skill)
-    print("is attack_buff", inst.buff_prefab == "ghostlyelixir_attack_buff")
-    print("elixirbuff", elixirbuff and elixirbuff.prefab == inst.buff_prefab)
+    -- print("has_skill", has_skill)
+    -- print("is attack_buff", inst.buff_prefab == "ghostlyelixir_attack_buff")
+    -- print("elixirbuff", elixirbuff and elixirbuff.prefab == inst.buff_prefab)
 
     if  elixirbuff == nil                                                       -- 当前作用对象没有上任何buff       
         or not has_skill                                                        -- 当前作用对象没有技能   

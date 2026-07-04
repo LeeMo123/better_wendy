@@ -228,7 +228,7 @@ end
 
 local function OnDebuffAdded(inst, name, debuff)
     if inst._playerlink ~= nil and inst._playerlink.components.pethealthbar ~= nil then
-        print("OnDebuffAdded", name)
+        -- print("OnDebuffAdded", name)
         -- 显示治疗药剂技能图标
         if name == "ghostly_healing_buff" then
             inst._playerlink.components.pethealthbar:SetSymbol3(debuff.prefab)
@@ -332,6 +332,8 @@ AddPrefabPostInit("abigail", function(inst)
     inst.LinkToPlayer = function(inst, player)
         if inst:GetDebuff("elixir_extra_buff") then
             player.components.pethealthbar:SetSymbol1(inst:GetDebuff("elixir_extra_buff").prefab)
+        elseif inst:GetDebuff("ghostly_healing_buff") then
+            player.components.pethealthbar:SetSymbol3(inst:GetDebuff("ghostly_healing_buff").prefab)
         end
         _oldLinkToPlayer(inst, player)
     end

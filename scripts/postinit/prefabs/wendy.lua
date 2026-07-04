@@ -279,7 +279,7 @@ AddPrefabPostInit("wendy", function(inst)
     if inst.components.debuffable then
         local old_ondebuffadded = inst.components.debuffable.ondebuffadded     
         inst.components.debuffable.ondebuffadded = function(inst, name, debuff)
-            print("Wendy: debuffable.ondebuffadded: ", name)
+            -- print("Wendy: debuffable.ondebuffadded: ", name)
             if name == "elixir_extra_buff" then
                 SetSymbol(inst, debuff.prefab)
             end    
