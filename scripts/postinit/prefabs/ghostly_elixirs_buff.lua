@@ -1,6 +1,9 @@
 local upvaluehelper = require("hooks/upvaluehelper")
 local SpDamageUtil = require("components/spdamageutil")
 
+-- 夜视修改
+modimport("scripts/postinit/prefabs/ghostvision_buff")
+
 ---------------------
 --- 月亮阿比
 ---------------------
@@ -52,7 +55,6 @@ end
 --- 不屈药剂&&复仇药剂buff
 ---------------------
 
---
 local function GetDeBuff(inst)
     if inst:GetDebuff("elixir_buff") and inst:GetDebuff("elixir_buff").potion_tunings.shield_prefab then
         return inst:GetDebuff("elixir_buff")
@@ -73,20 +75,24 @@ local onattacked_shield = function(inst, data)
     local debuff = GetDeBuff(inst)
     --  复仇药剂反伤效果    
     if debuff.potion_tunings.playerreatliate then
-        if data.attacker ~= nil then
+        if data.attacker ~= nil and data.attacker.components.combat ~= nil then
             data.attacker.components.combat:GetAttacked(inst, TUNING.GHOSTLYELIXIR_RETALIATION_DAMAGE)
             SpawnPrefab("abigail_retaliation"):SetRetaliationTarget(data.attacker)
         end
     end
 
     if inst.shield_cd == nil then
-        local fx = SpawnPrefab("elixir_player_forcefield")
-        inst:AddChild(fx)
-        inst.SoundEmitter:PlaySound("dontstarve/characters/wendy/abigail/shield/on")
+        if inst:HasTag("abigail") then
+            inst:AddDebuff("forcefield", debuff ~= nil and debuff.potion_tunings.shield_prefab or "abigailforcefield")
+        else
+            local fx = SpawnPrefab("elixir_player_forcefield")
+            inst:AddChild(fx)
+            inst.SoundEmitter:PlaySound("dontstarve/characters/wendy/abigail/shield/on")
+        end
 
         inst.components.health.externalreductionmodifiers:RemoveModifier(inst, "forcefield")
 
-        inst.shield_cd = inst:DoTaskInTime(10, function()
+        inst.shield_cd = inst:DoTaskInTime(13, function()
             if inst.components.health ~= nil then
                 inst.components.health.externalreductionmodifiers:SetModifier(inst,
                     inst:HasTag("player") and TUNING.GHOSTLYELIXIR_PLAYER_SHIELD_REDUCTION or

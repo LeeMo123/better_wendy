@@ -295,9 +295,8 @@ local allegiance_skills = {
             if inst.components.ghostlybond and inst.components.ghostlybond.ghost then
                 inst.components.ghostlybond.ghost:AddTag("shadow_aligned")
                 addresists(inst.components.ghostlybond.ghost)
-                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(9)
+                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(8)
             end
-
             
             inst:WatchWorldState("phase", UpdateDamage)
             UpdateDamage(inst)
@@ -355,7 +354,7 @@ local allegiance_skills = {
             if inst.components.ghostlybond and inst.components.ghostlybond.ghost then
                 inst.components.ghostlybond.ghost:AddTag("shadow_aligned")
                 addresists(inst.components.ghostlybond.ghost)
-                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(18)
+                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(15)
             end
         end,
 
@@ -425,8 +424,7 @@ local allegiance_skills = {
             if inst.components.ghostlybond and inst.components.ghostlybond.ghost then
                 inst.components.ghostlybond.ghost:AddTag("lunar_aligned")
                 addresists(inst.components.ghostlybond.ghost)
-                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(TUNING.SKILLS.WENDY
-                                                                                              .GHOST_PLANARDEFENSE)
+                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(8)
             end
 
             -- inst:ListenForEvent("goinsane", goinsane)
@@ -470,7 +468,7 @@ local allegiance_skills = {
         onactivate = function(inst, fromload)
             inst:AddTag("player_lunar_aligned")
 
-            local addresists = function(pref)
+            local   addresists = function(pref)
                 local damagetyperesist = pref.components.damagetyperesist
                 if damagetyperesist then
                     damagetyperesist:AddResist("lunar_aligned", pref, 0.8, "allegiance_lunar")
@@ -485,7 +483,7 @@ local allegiance_skills = {
             if inst.components.ghostlybond and inst.components.ghostlybond.ghost then
                 inst.components.ghostlybond.ghost:AddTag("lunar_aligned")
                 addresists(inst.components.ghostlybond.ghost)
-                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(18)
+                inst.components.ghostlybond.ghost.components.planardefense:SetBaseDefense(15)
             end
         end,
 

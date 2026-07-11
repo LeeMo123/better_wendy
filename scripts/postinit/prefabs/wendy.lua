@@ -1,5 +1,8 @@
 modimport("scripts/postinit/widgets/healthbadge")           -- 多药剂显示等相关1
 modimport("scripts/postinit/widgets/statusdisplays")        -- 多药剂显示等相关2
+
+modimport("scripts/postinit/prefabs/ghost_init")            -- 所有鬼魂预制体添加一个额外的标签ghost_wendy
+
 local upvaluehelper = require("hooks/upvaluehelper")        -- 监听函数修改
 
 -- 获取玩家穿戴装备的护甲值
@@ -55,6 +58,21 @@ local function UpdateBonusHealth(inst, level)
     inst.bonus_max_health = health
     
     SetMaxHealth(inst)
+end
+
+-- 回san效果
+local function update_sanityaura(inst, num)
+	if num > 0 then
+        print("num:", num)
+		if not inst.components.sanityaura then
+			inst:AddComponent("sanityaura")
+		end
+        -- 回san的数值
+        inst.components.sanityaura.aura = num == 4 and 0.4 or 0.1*num
+        inst.components.sanityaura.max_distsq = 5
+	elseif inst.components.sanityaura ~= nil then
+		inst:RemoveComponent("sanityaura")
+	end
 end
 
 local function update_bonus_health(inst, data)
@@ -153,8 +171,11 @@ local function activate(abigail, sisturn_state)
     abigail.components.health:SetAbsorptionAmount(petals_evil == 4 and 0.5 or petals_evil *0.1)
 
     -- 血量加成
-    abigail.bonus_max_health = moon_tree_blossom == 4 and 700 or moon_tree_blossom*100
-    abigail:SetMaxHealth()
+    -- abigail.bonus_max_health = moon_tree_blossom == 4 and 700 or moon_tree_blossom*100
+    -- abigail:SetMaxHealth()
+
+    -- 回san效果
+    update_sanityaura(abigail, moon_tree_blossom)
 
     -- 回血速度加成
     abigail.components.health:StartRegen(1 + (petals == 4 and 5 or petals), 1)
@@ -203,8 +224,18 @@ end
 ---------------------------------------------
 
 local function SetSymbol(inst,symbol)
-    if TheWorld.ismastersim and inst._buffsymbol2:value() ~= symbol then
-        inst._buffsymbol2:set(symbol)
+    if TheWorld.ismastersim then
+        if inst._buffsymbol:value() ~= symbol then
+            inst._buffsymbol:set(symbol)
+        end
+    end
+end
+
+local function SetSymbol2(inst,symbol)
+    if TheWorld.ismastersim then
+        if inst._buffsymbol2:value() ~= symbol then
+            inst._buffsymbol2:set(symbol)
+        end
     end
 end
 
@@ -273,6 +304,11 @@ AddPrefabPostInit("wendy", function(inst)
             Old_Onload(inst, data)
         end
     end
+    
+    -- 移除掉温san免疫 ghost,不然的话阿比盖尔的回san光环对温蒂无效
+	inst.components.sanity:RemoveSanityAuraImmunity("ghost", inst)
+    -- 改用改tag标签去标记
+    inst.components.sanity:AddSanityAuraImmunity("ghost_wendy", inst)
 
     -- 温蒂可以饮用2种药剂    
     -- 重写 debuffable 回调以支持自定义图标
@@ -281,17 +317,19 @@ AddPrefabPostInit("wendy", function(inst)
         inst.components.debuffable.ondebuffadded = function(inst, name, debuff)
             -- print("Wendy: debuffable.ondebuffadded: ", name)
             if name == "elixir_extra_buff" then
+                SetSymbol2(inst, debuff.prefab)
+            elseif name == "elixir_buff" then
                 SetSymbol(inst, debuff.prefab)
-            end    
-            old_ondebuffadded(inst, name, debuff)
+            end 
         end
 
         local old_ondebuffremoved = inst.components.debuffable.ondebuffremoved
         inst.components.debuffable.ondebuffremoved = function(inst, name, debuff)
             if name == "elixir_extra_buff" then
+                SetSymbol2(inst, 0)
+            elseif name == "elixir_buff" then
                 SetSymbol(inst, 0)
             end
-            old_ondebuffremoved(inst)
         end
     end
 end)

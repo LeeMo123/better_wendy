@@ -82,7 +82,6 @@ for _, ghost_name in pairs(ghosts) do
         inst.explode = false
 
         inst.OnSummons = OnSummons
-        inst.ExplodeFeather = ExplodeFeather
 
         local OldOnSave = inst.OnSave
         inst.OnSave = function(inst, data)

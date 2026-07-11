@@ -334,8 +334,8 @@ local function AddPotion(potions, name, anim)
 		Asset("ANIM", "anim/ghostly_elixirs.zip"),
 		Asset("ANIM", "anim/abigail_buff_drip.zip"),
 		Asset("ANIM", "anim/player_elixir_buff_drip.zip"),
-		Asset("ANIM", "anim/player_vial_fx.zip"),
-		Asset("ANIM", "anim/abigail_vial_fx.zip"),
+		Asset("ANIM", "anim/more_player_vial_fx.zip"),
+		Asset("ANIM", "anim/more_abigail_vial_fx.zip"),
 
 		Asset("ATLAS", "images/inventoryimages/ghostlyelixir_"..name..".xml"),
 		Asset("IMAGE", "images/inventoryimages/ghostlyelixir_"..name..".tex"),

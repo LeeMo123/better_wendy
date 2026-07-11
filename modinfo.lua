@@ -9,7 +9,7 @@ description = L and
 ]]
 
 author = "去码头整点薯条"
-version = "2026.06.11"
+version = "2026.07.06"
 
 icon_atlas = "images/modicon.xml"
 icon = "modicon.tex"

@@ -6,72 +6,6 @@ modimport("scripts/postinit/widgets/statusdisplays")
 -- hook 库导入
 local upvaluehelper = require("hooks/upvaluehelper")
 
-local function ShadowFX_Start(inst)
-    local x,y,z = inst.Transform:GetWorldPosition()
-    local xoffset = math.random(-10, 10) / 10
-    local zoffset = math.random(-10, 10) / 10
-    if not inst.inlimbo and not inst.sg:HasStateTag("busy") then
-    --SpawnPrefab("minotaur_blood"..math.random(3)).Transform:SetPosition(x + xoffset, y, z + zoffset)
-        SpawnPrefab("cane_ancient_fx").Transform:SetPosition(x + xoffset, y, z + zoffset)
-    end
-end
-
--- 重置任务
-local function reset_cd(inst)
-    if inst.abigail_attack_stack ~= 0 then
-        inst.abigail_attack_stack = 0
-    end
-    
-    inst.components.planardamage:SetBaseDamage(5)
-end
-
-local function reset_resist(inst)
-    inst.components.damagetyperesist.targets = {}
-end
-
--- 攻击特效
-local function onattackother(inst, data)
-    -- 取消已有任务并重新计时
-    if inst.abigail_attack_task then
-        inst.abigail_attack_task:Cancel()  -- 取消正在进行的倒计时
-        inst.abigail_attack_task = nil
-    end
-
-    -- 无动作10秒后重置
-    inst.abigail_attack_task = inst:DoTaskInTime(10, reset_cd)
-    -- 增伤效果
-    if inst.abigail_attack_stack < 10 then
-        local planardamage = inst.components.planardamage
-        planardamage:SetBaseDamage( 5 + inst.abigail_attack_stack*2 )
- 
-        -- 累加攻击次数
-        inst.abigail_attack_stack = inst.abigail_attack_stack + 1
-    end
-    
-    -- -- 添加减伤效果
-    local victim = data.target
-    local combat = victim.components.combat
-    if inst and combat then
-        if victim.abigail_target_resist then
-            victim.abigail_target_resist:Cancel()
-            victim.abigail_target_resist = nil
-        end
-
-        victim:AddTag("abigail_target_resist")
-        victim.abigail_target_resist = victim:DoTaskInTime(10, function()
-            victim:RemoveTag("abigail_target_resist")
-            inst.components.damagetyperesist:RemoveResist("abigail_target_resist", inst, "abigail_target_resist")
-        end)
-
-        -- 
-        local resist = inst.components.damagetyperesist:GetResistForTag("abigail_target_resist")
-        print("减伤效果:", resist)
-        if resist > 0.5 then
-            inst.components.damagetyperesist:AddResist("abigail_target_resist", inst, math.max((resist - 0.1), 0.5), "abigail_target_resist")
-        end
-    end
-end
-
 -- 暗影药剂效果
 local function SetToShadow(inst, isreload)
     local x,y,z = inst.Transform:GetWorldPosition()
@@ -99,6 +33,9 @@ local function SetToShadow(inst, isreload)
         inst:PushEvent("startaura")
     end
 
+    -- 添加位面伤害
+    inst.components.planardamage:AddBonus(inst, 5, "wendy_shadow_1")
+
     -- 易伤效果 && 减伤效果
     if skilled or isreload then
         inst.shadowstate = true
@@ -106,15 +43,8 @@ local function SetToShadow(inst, isreload)
         -- 改变形态为暗影阿比
         inst.AnimState:SetBuild("ghost_abigail_shadow_build")
         
-        -- 添加位面伤害 初始值为5
-        inst.components.planardamage:SetBaseDamage(5)
-
-        -- 减伤效果
-        if inst.components.damagetyperesist == nil then
-            inst:AddComponent("damagetyperesist")
-        end
-
-        inst:ListenForEvent("onareaattackother", onattackother)
+        -- 增加位面伤害
+        inst.components.planardamage:AddBonus(inst, 10, "wendy_shadow_2")
     end
 end
 
@@ -132,11 +62,9 @@ local function SetShadowToNormal(inst)
         fx.Transform:SetScale(1.2, 1.2, 1.2)
         fx.Transform:SetPosition(inst.Transform:GetWorldPosition())
 
-        -- 移除监听
-        inst:RemoveEventCallback("onareaattackother", onattackother)
-
-        -- 恢复位面伤害
-        inst.components.planardamage:SetBaseDamage(0)
+        -- 移除位面伤害 增伤
+        inst.components.planardamage:RemoveBonus(inst, "wendy_shadow_1")
+        inst.components.planardamage:RemoveBonus(inst, "wendy_shadow_2")
     end
     
     -- 同步一下
@@ -183,7 +111,6 @@ local function SetToGestalt(inst)
         inst.components.planardamage:RemoveBonus(buff, "ghostlyelixir_lunarbonus")
         inst.components.planardamage:AddBonus(buff, TUNING.SKILLS.WENDY.LUNARELIXIR_DAMAGEBONUS_GESTALT, "ghostlyelixir_lunarbonus")
     end
-
 end
 
 local function SetToNormal(inst)
@@ -268,6 +195,15 @@ end
 local NO_TAGS_NO_PLAYERS =	{ "INLIMBO", "notarget", "noattack", "wall", "player", "companion", "playerghost" }
 local COMBAT_TARGET_TAGS = { "_combat" }
 local ABIGAIL_DEFENSIVE_MAX_FOLLOW_DSQ = TUNING.ABIGAIL_DEFENSIVE_MAX_FOLLOW * TUNING.ABIGAIL_DEFENSIVE_MAX_FOLLOW
+
+local function GetDeBuff(inst)
+    if inst:GetDebuff("elixir_buff") and inst:GetDebuff("elixir_buff").potion_tunings.shield_prefab then
+        return inst:GetDebuff("elixir_buff")
+    elseif inst:GetDebuff("elixir_extra_buff") and inst:GetDebuff("elixir_extra_buff").potion_tunings.shield_prefab then
+        return inst:GetDebuff("elixir_extra_buff")
+    end
+end
+
 local function OnAttacked(inst, data)
     local combat = inst.components.combat
     if data.attacker == nil then
@@ -283,6 +219,17 @@ local function OnAttacked(inst, data)
             end
         end
     end
+
+    -- 暗影阿比受到攻击时生成一个短暂的护盾效果
+    if inst.shadowstate then
+        if not inst.sg:HasStateTag("dissipate") and not inst:HasDebuff("forcefield") and
+            not (inst:GetDebuff("elixir_buff") and inst:GetDebuff("elixir_buff").potion_tunings.shield_prefab) and
+            not (inst:GetDebuff("elixir_extra_buff") and inst:GetDebuff("elixir_extra_buff").potion_tunings.shield_prefab) and
+            (inst.components.health == nil or not inst.components.health:IsDead()) then
+            inst:AddDebuff("forcefield", "abigailforcefield")
+        end
+    end
+
 end
 
 -- 阿比盖尔
